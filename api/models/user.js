@@ -47,6 +47,22 @@ const userSchema = new mongoose.Schema({
   isAdmin: {
     type: Boolean,
     default: false
+  },
+  desc: {
+    type: String,
+    max: 50
+  },
+  city: {
+    type: String,
+    max: 50
+  },
+  country: {
+    type: String,
+    max: 50
+  },
+  relationship: {
+    type: Number,
+    enum: [1, 2, 3]
   }
 },
 {timestamps : true}
