@@ -1,9 +1,10 @@
 const router = require("express").Router();
 const bcrypt = require("bcrypt");
 const userModel = require("../models/user");
+const checkAuth = require("../middleware/check-authorization");
 
 // Update
-router.put("/:id", async (req, res) => {
+router.put("/:id", checkAuth, async (req, res) => {
   if (req.body.userid === req.params.id || req.body.isAdmin) {
     if (req.body.password) {
       try {
@@ -15,7 +16,13 @@ router.put("/:id", async (req, res) => {
     }
 
     try {
-      const user = await userModel.findByIdAndUpdate(req.params.id, {
+      const user = await userModel.findById(req.params.id)
+      if (user.username !== req.userData.username) {
+        return res.status(401).json({
+          message: "Token auth failed.",
+        });
+      }
+      await userModel.findByIdAndUpdate(req.params.id, {
         $set: req.body
       });
       res.status(200).json("Your account has been updated successfully.");
@@ -28,9 +35,16 @@ router.put("/:id", async (req, res) => {
 });
 
 // Delete
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", checkAuth, async (req, res) => {
   if (req.body.userid === req.params.id || req.body.isAdmin) {
     try {
+      const user = await userModel.findById(req.params.id)
+      if (user.username !== req.userData.username) {
+        return res.status(401).json({
+          message: "Token auth failed.",
+        });
+      }
+
       await userModel.findByIdAndDelete(req.params.id);
       res.status(200).json("Your account has been deleted successfully.");
     } catch (err) {
@@ -57,11 +71,17 @@ router.get("/:id", async (req, res) => {
 });
 
 // Follow
-router.put("/:id/follow", async (req, res) => {
+router.put("/:id/follow", checkAuth, async (req, res) => {
   if (req.body.userid !== req.params.id) {
     try {
       const targetUser = await userModel.findById(req.params.id);
       const user = await userModel.findById(req.body.userid);
+
+      if (user.username !== req.userData.username) {
+        return res.status(401).json({
+          message: "Token auth failed.",
+        });
+      }
 
       if (!targetUser.followers.includes(req.body.userid)) {
         await targetUser.updateOne({
@@ -87,11 +107,17 @@ router.put("/:id/follow", async (req, res) => {
 });
 
 // Unfollow
-router.put("/:id/unfollow", async (req, res) => {
+router.put("/:id/unfollow", checkAuth, async (req, res) => {
   if (req.body.userid !== req.params.id) {
     try {
       const targetUser = await userModel.findById(req.params.id);
       const user = await userModel.findById(req.body.userid);
+
+      if (user.username !== req.userData.username) {
+        return res.status(401).json({
+          message: "Token auth failed.",
+        });
+      }
 
       if (targetUser.followers.includes(req.body.userid)) {
         await targetUser.updateOne({
