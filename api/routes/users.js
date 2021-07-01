@@ -70,7 +70,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// Follow
+// Follow request
 router.put("/:id/follow", checkAuth, async (req, res) => {
   if (req.body.userid !== req.params.id) {
     try {
@@ -83,20 +83,58 @@ router.put("/:id/follow", checkAuth, async (req, res) => {
         });
       }
 
-      if (!targetUser.followers.includes(req.body.userid)) {
+      if (!targetUser.followers.includes(req.body.userid) && !targetUser.requests.includes(req.body.userid)) {
         await targetUser.updateOne({
           $push: {
-            followers: req.body.userid
+            requests: req.body.userid
+          }
+        });
+        res.status(200).json("Request successfully sent.");
+      } else if (targetUser.followers.includes(req.body.userid)) {
+        res.status(403).json("You are already following this person.");
+      } else {
+        res.status(403).json("You have already sent a request to follow this person.");
+      }
+    } catch (err) {
+      res.status(500).json(err);
+    }
+  } else {
+    res.status(403).json("You can't follow yourself...")
+  }
+});
+
+// Accept request
+router.put("/:id/accept", checkAuth, async (req, res) => {
+  if (req.body.userid !== req.params.id) {
+    try {
+      const targetUser = await userModel.findById(req.params.id);
+      const user = await userModel.findById(req.body.userid);
+
+      if (user.username !== req.userData.username) {
+        return res.status(401).json({
+          message: "Token auth failed.",
+        });
+      }
+
+      if (user.requests.includes(req.params.id)) {
+        await targetUser.updateOne({
+          $push: {
+            following: req.body.userid
           }
         });
         await user.updateOne({
           $push: {
-            following: req.params.id
+            followers: req.params.id
           }
         });
-        res.status(200).json("Succesfully followed.");
+        await user.updateOne({
+          $pull: {
+            requests: req.params.id
+          }
+        });
+        res.status(200).json("Request successfully accepted.");
       } else {
-        res.status(403).json("You are already following this person.");
+        res.status(403).json("This person hasn't requested to follow you.");
       }
     } catch (err) {
       res.status(500).json(err);
