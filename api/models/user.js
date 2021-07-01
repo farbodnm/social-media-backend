@@ -44,6 +44,10 @@ const userSchema = new mongoose.Schema({
     type: Array,
     default: []
   },
+  requests: {
+    type: Array,
+    default: []
+  },
   isAdmin: {
     type: Boolean,
     default: false
@@ -64,8 +68,8 @@ const userSchema = new mongoose.Schema({
     type: Number,
     enum: [1, 2, 3]
   }
-},
-{timestamps : true}
-);
+}, {
+  timestamps: true
+});
 
 module.exports = mongoose.model("user", userSchema);
