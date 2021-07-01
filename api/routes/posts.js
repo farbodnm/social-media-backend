@@ -1,9 +1,17 @@
 const router = require("express").Router();
 const postModel = require("../models/post");
 const userModel = require("../models/user");
+const checkAuth = require("../middleware/check-authorization");
 
 // Create
-router.post("/", async (req, res) => {
+router.post("/", checkAuth, async (req, res) => {
+  const user = await userModel.findById(req.body.userid)
+  if (user.username !== req.userData.username) {
+    return res.status(401).json({
+      message: "Token auth failed.",
+    });
+  }
+
   const newPost = new postModel(req.body);
   try {
     const savedPost = await newPost.save();
@@ -14,8 +22,15 @@ router.post("/", async (req, res) => {
 })
 
 // Update
-router.put("/:id", async (req, res) => {
+router.put("/:id", checkAuth, async (req, res) => {
   try {
+    const user = await userModel.findById(req.body.userid)
+    if (user.username !== req.userData.username) {
+      return res.status(401).json({
+        message: "Token auth failed.",
+      });
+    }
+
     const post = await postModel.findById(req.params.id);
     if (post.userid === req.body.userid) {
       await post.updateOne({
@@ -31,8 +46,15 @@ router.put("/:id", async (req, res) => {
 });
 
 // Delete
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", checkAuth, async (req, res) => {
   try {
+    const user = await userModel.findById(req.body.userid)
+    if (user.username !== req.userData.username) {
+      return res.status(401).json({
+        message: "Token auth failed.",
+      });
+    }
+
     const post = await postModel.findById(req.params.id);
     if (post.userid === req.body.userid) {
       await post.deleteOne();
@@ -46,8 +68,15 @@ router.delete("/:id", async (req, res) => {
 });
 
 // Like
-router.put("/:id/like", async (req, res) => {
+router.put("/:id/like", checkAuth, async (req, res) => {
   try {
+    const user = await userModel.findById(req.body.userid)
+    if (user.username !== req.userData.username) {
+      return res.status(401).json({
+        message: "Token auth failed.",
+      });
+    }
+
     const post = await postModel.findById(req.params.id);
     if (!post.likes.includes(req.body.userid)) {
       await post.updateOne({
@@ -80,9 +109,15 @@ router.get("/:id", async (req, res) => {
 })
 
 // Get timeline
-router.get("/timeline/all", async (req, res) => {
+router.get("/timeline/all", checkAuth, async (req, res) => {
   try {
     const user = await userModel.findById(req.body.userid);
+    if (user.username !== req.userData.username) {
+      return res.status(401).json({
+        message: "Token auth failed.",
+      });
+    }
+
     const userPosts = await postModel.find({
       userid: user._id
     });
