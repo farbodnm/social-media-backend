@@ -108,6 +108,19 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+// Search
+router.get("/search/:username", async (req, res) => {
+  const usernameRegex = new RegExp(req.params.username + ".*", "i");
+  try {
+    const user = await userModel.find({
+      username: usernameRegex
+    }).select("username firstName lastName avatar");
+    res.status(200).json(user);
+  } catch (err) {
+    return res.status(500).json(err);
+  }
+});
+
 // Follow request
 router.put("/:id/follow", checkAuth, async (req, res) => {
   if (req.body.userid !== req.params.id) {
