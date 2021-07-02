@@ -11,8 +11,7 @@ const postRoute = require("./api/routes/posts");
 dotenv.config();
 
 mongoose.connect(
-	process.env.MONGO_URL,
-	{
+	process.env.MONGO_URL, {
 		useNewUrlParser: true,
 		useUnifiedTopology: true,
 		useCreateIndex: true
