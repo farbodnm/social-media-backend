@@ -28,8 +28,8 @@ router.post("/", checkAuth, upload.single("file"), async (req, res) => {
   }
 })
 
-// Update
-router.put("/:id", checkAuth, async (req, res) => {
+// Edit
+router.put("/:id", checkAuth, upload.single("file"), async (req, res) => {
   try {
     const user = await userModel.findById(req.body.userid)
     if (user.username !== req.userData.username) {
@@ -41,11 +41,15 @@ router.put("/:id", checkAuth, async (req, res) => {
     const post = await postModel.findById(req.params.id);
     if (post.userid === req.body.userid) {
       await post.updateOne({
-        $set: req.body
+        $set: {
+          desc: req.body.desc,
+          media: req.file ? req.file.path : null,
+          mediatype: req.file ? req.file.mimetype.split("/")[0] : null
+        }
       });
-      res.status(200).json("Post successfully updated.");
+      res.status(200).json("Post successfully edited.");
     } else {
-      res.status(403).json("You can only update your own posts.");
+      res.status(403).json("You can only edit your own posts.");
     }
   } catch (err) {
     res.status(500).json(err);
