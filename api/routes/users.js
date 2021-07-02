@@ -114,7 +114,7 @@ router.get("/search/:username", async (req, res) => {
   try {
     const user = await userModel.find({
       username: usernameRegex
-    }).select("username firstName lastName avatar");
+    }).select("username firstName lastName profilePicture");
     res.status(200).json(user);
   } catch (err) {
     return res.status(500).json(err);
