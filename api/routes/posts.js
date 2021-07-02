@@ -2,9 +2,10 @@ const router = require("express").Router();
 const postModel = require("../models/post");
 const userModel = require("../models/user");
 const checkAuth = require("../middleware/check-authorization");
+const upload = require("../middleware/upload");
 
 // Create
-router.post("/", checkAuth, async (req, res) => {
+router.post("/", checkAuth, upload.single("file"), async (req, res) => {
   const user = await userModel.findById(req.body.userid)
   if (user.username !== req.userData.username) {
     return res.status(401).json({
@@ -12,7 +13,13 @@ router.post("/", checkAuth, async (req, res) => {
     });
   }
 
-  const newPost = new postModel(req.body);
+  const newPost = new postModel({
+    userid: req.body.userid,
+    desc: req.body.desc,
+    media: req.file ? req.file.path : null,
+    mediatype: req.file ? req.file.mimetype.split("/")[0] : null
+  });
+  console.log(newPost)
   try {
     const savedPost = await newPost.save();
     res.status(200).json(savedPost);
