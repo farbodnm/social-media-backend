@@ -42,9 +42,9 @@ router.put("/:id", checkAuth, upload.single("file"), async (req, res) => {
     if (post.userid === req.body.userid) {
       await post.updateOne({
         $set: {
-          desc: req.body.desc,
-          media: req.file ? req.file.path : null,
-          mediatype: req.file ? req.file.mimetype.split("/")[0] : null
+          desc: req.body.desc ? req.body.desc : post.desc,
+          media: req.file ? req.file.path : post.media,
+          mediatype: req.file ? req.file.mimetype.split("/")[0] : post.mediatype
         }
       });
       res.status(200).json("Post successfully edited.");
