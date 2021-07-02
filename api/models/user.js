@@ -54,19 +54,23 @@ const userSchema = new mongoose.Schema({
   },
   desc: {
     type: String,
-    max: 50
+    max: 50,
+    default: null
   },
   city: {
     type: String,
-    max: 50
+    max: 50,
+    default: null
   },
   country: {
     type: String,
-    max: 50
+    max: 50,
+    default: null
   },
   relationship: {
     type: Number,
-    enum: [1, 2, 3]
+    enum: [1, 2, 3],
+    default: null
   }
 }, {
   timestamps: true

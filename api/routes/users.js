@@ -2,9 +2,10 @@ const router = require("express").Router();
 const bcrypt = require("bcrypt");
 const userModel = require("../models/user");
 const checkAuth = require("../middleware/check-authorization");
+const upload = require("../middleware/upload");
 
 // Update
-router.put("/:id", checkAuth, async (req, res) => {
+router.put("/:id", checkAuth, upload.single("file"), async (req, res) => {
   if (req.body.userid === req.params.id || req.body.isAdmin) {
     if (req.body.password) {
       try {
@@ -21,9 +22,20 @@ router.put("/:id", checkAuth, async (req, res) => {
         return res.status(401).json({
           message: "Token auth failed.",
         });
-      }
+      };
       await userModel.findByIdAndUpdate(req.params.id, {
-        $set: req.body
+        $set: {
+          profilePicture: req.file ? req.file.path : user.profilePicture,
+          username: req.body.username ? req.body.username : user.username,
+          firstName: req.body.firstName ? req.body.firstName : user.firstName,
+          lastName: req.body.lastName ? req.body.lastName : user.lastName,
+          email: req.body.email ? req.body.email : user.email,
+          password: req.body.password ? req.body.password : user.password,
+          desc: req.body.desc ? req.body.desc : user.desc,
+          city: req.body.city ? req.body.city : user.city,
+          country: req.body.country ? req.body.country : user.country,
+          relationship: req.body.relationship ? req.body.relationship : user.relationship
+        }
       });
       res.status(200).json("Your account has been updated successfully.");
     } catch (err) {
@@ -33,6 +45,32 @@ router.put("/:id", checkAuth, async (req, res) => {
     return res.status(403).json("You can only update your own account.");
   }
 });
+
+// Upload cover image
+router.put("/:id/cover", checkAuth, upload.single("file"), async (req, res) => {
+  try {
+    const user = await userModel.findById(req.params.id)
+    console.log('1')
+    if (user.username !== req.userData.username) {
+      return res.status(401).json({
+        message: "Token auth failed.",
+      });
+    };
+    if (req.body.userid === req.params.id) {
+      console.log('2')
+      await user.updateOne(req.params.id, {
+        $set: {
+          coverPicture: req.file ? req.file.path : user.coverPicture
+        }
+      });
+      res.status(200).json("Your account has been updated successfully.");
+    } else {
+      return res.status(403).json("You can only update your own account.");
+    }
+  } catch (err) {
+    return res.status(500).json(err);
+  }
+})
 
 // Delete
 router.delete("/:id", checkAuth, async (req, res) => {
