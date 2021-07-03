@@ -121,9 +121,8 @@ router.get("/:id", async (req, res) => {
 
 router.get("/userposts/:id", async (req, res) => {
   try {
-    const user = await userModel.findById(req.params.id);
     const posts = await postModel.find({
-      id: user._id
+      id: req.params.id
     })
     res.status(200).json(posts);
   } catch (err) {
