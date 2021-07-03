@@ -44,6 +44,7 @@ app.use(morgan("common"));
 app.use("/api/auth", authRoute);
 app.use("/api/users", userRoute);
 app.use("/api/posts", postRoute);
+app.use("/uploads/", express.static("uploads"));
 
 app.listen(8880, () => {
 	console.log("Backend is running.");
