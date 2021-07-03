@@ -119,6 +119,24 @@ router.get("/:id", async (req, res) => {
   }
 })
 
+router.get("/userposts/all", checkAuth, async (req, res) => {
+  try {
+    const user = await userModel.findById(req.body.userid);
+    if (user.username !== req.userData.username) {
+      return res.status(401).json({
+        message: "Token auth failed.",
+      });
+    }
+
+    const posts = await postModel.find({
+      userid: user._id
+    })
+    res.status(200).json(posts);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+})
+
 // Get timeline
 router.get("/timeline/all", checkAuth, async (req, res) => {
   try {
