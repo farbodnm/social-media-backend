@@ -5,13 +5,13 @@ const checkAuth = require("../middleware/check-authorization");
 const upload = require("../middleware/upload");
 
 // Create
-router.post("/", checkAuth, upload.single("file"), async (req, res) => {
+router.post("/", upload.single("file"), async (req, res) => {
   const user = await userModel.findById(req.body.userid)
-  if (user.username !== req.userData.username) {
-    return res.status(401).json({
-      message: "Token auth failed.",
-    });
-  }
+  // if (user.username !== req.userData.username) {
+  //   return res.status(401).json({
+  //     message: "Token auth failed.",
+  //   });
+  // }
 
   const newPost = new postModel({
     userid: req.body.userid,
@@ -29,14 +29,14 @@ router.post("/", checkAuth, upload.single("file"), async (req, res) => {
 })
 
 // Edit
-router.put("/:id", checkAuth, upload.single("file"), async (req, res) => {
+router.put("/:id", upload.single("file"), async (req, res) => {
   try {
     const user = await userModel.findById(req.body.userid)
-    if (user.username !== req.userData.username) {
-      return res.status(401).json({
-        message: "Token auth failed.",
-      });
-    }
+    // if (user.username !== req.userData.username) {
+    //   return res.status(401).json({
+    //     message: "Token auth failed.",
+    //   });
+    // }
 
     const post = await postModel.findById(req.params.id);
     if (post.userid === req.body.userid) {
@@ -57,14 +57,14 @@ router.put("/:id", checkAuth, upload.single("file"), async (req, res) => {
 });
 
 // Delete
-router.delete("/:id", checkAuth, async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
     const user = await userModel.findById(req.body.userid)
-    if (user.username !== req.userData.username) {
-      return res.status(401).json({
-        message: "Token auth failed.",
-      });
-    }
+    // if (user.username !== req.userData.username) {
+    //   return res.status(401).json({
+    //     message: "Token auth failed.",
+    //   });
+    // }
 
     const post = await postModel.findById(req.params.id);
     if (post.userid === req.body.userid) {
@@ -79,14 +79,14 @@ router.delete("/:id", checkAuth, async (req, res) => {
 });
 
 // Like
-router.put("/:id/like", checkAuth, async (req, res) => {
+router.put("/:id/like", async (req, res) => {
   try {
     const user = await userModel.findById(req.body.userid)
-    if (user.username !== req.userData.username) {
-      return res.status(401).json({
-        message: "Token auth failed.",
-      });
-    }
+    // if (user.username !== req.userData.username) {
+    //   return res.status(401).json({
+    //     message: "Token auth failed.",
+    //   });
+    // }
 
     const post = await postModel.findById(req.params.id);
     if (!post.likes.includes(req.body.userid)) {
@@ -131,14 +131,14 @@ router.get("/userposts/:id", async (req, res) => {
 })
 
 // Get timeline
-router.get("/timeline/all", checkAuth, async (req, res) => {
+router.get("/timeline/all", async (req, res) => {
   try {
     const user = await userModel.findById(req.body.userid);
-    if (user.username !== req.userData.username) {
-      return res.status(401).json({
-        message: "Token auth failed.",
-      });
-    }
+    // if (user.username !== req.userData.username) {
+    //   return res.status(401).json({
+    //     message: "Token auth failed.",
+    //   });
+    // }
 
     const userPosts = await postModel.find({
       userid: user._id
