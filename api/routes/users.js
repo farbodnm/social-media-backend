@@ -108,6 +108,27 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+// Get profile.
+router.get("/profile/:username", async (req, res) => {
+  try {
+    const user = await userModel.findOne({
+      username: req.params.username
+    })
+    if (user) {
+      const {
+        password,
+        updatedAt,
+        ...other
+      } = user._doc;
+      res.status(200).json(other);
+    } else {
+      return res.status(404).json("User not found.");
+    }
+  } catch (err) {
+    return res.status(500).json(err);
+  }
+})
+
 // Search
 router.get("/search/:username", async (req, res) => {
   const usernameRegex = new RegExp(req.params.username + ".*", "i");
