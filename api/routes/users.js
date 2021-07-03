@@ -214,6 +214,32 @@ router.put("/:id/accept", async (req, res) => {
   }
 });
 
+// Reject request
+
+router.put("/:id/reject", async (req, res) => {
+  if (req.body.userid !== req.params.id) {
+    try {
+      const targetUser = await userModel.findById(req.params.id);
+      const user = await userModel.findById(req.body.userid);
+
+      if (user.requests.includes(req.params.id)) {
+        await user.updateOne({
+          $pull: {
+            requests: req.params.id
+          }
+        });
+        res.status(200).json("Request successfully rejected.");
+      } else {
+        res.status(403).json("This person hasn't requested to follow you.");
+      }
+    } catch (err) {
+      res.status(500).json(err);
+    }
+  } else {
+    res.status(403).json("You can't follow yourself...")
+  }
+});
+
 // Unfollow
 router.put("/:id/unfollow", async (req, res) => {
   if (req.body.userid !== req.params.id) {
